@@ -1,0 +1,7 @@
+# Core NLP dependencies
+spacy>=3.5.0
+thefuzz>=0.20.0
+python-Levenshtein>=0.21.0  # Speed up thefuzz
+
+# For downloading spaCy models, run:
+# python -m spacy download en_core_web_sm

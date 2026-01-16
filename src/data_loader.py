@@ -14,7 +14,7 @@ def load_transcript(file_path):
         seg=segments[key]
         if len(seg)>=3:
             transcript_data.append({
-                id: key,
+                "id": key,
                 "start": seg[0],
                 "end": seg[1],
                 "text": seg[2]
