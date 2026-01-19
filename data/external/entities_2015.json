@@ -1,0 +1,199 @@
+{
+    "players": {
+        "manchester_united": [
+            {
+                "canonical": "David De Gea",
+                "aliases": ["De Gea", "DeGea", "Degea", "Gea", "David Gea"],
+                "misspellings": ["De Jea", "Dejea", "Dejaa", "Géa", "Davide Jea"]
+            },
+            {
+                "canonical": "Antonio Valencia",
+                "aliases": ["Valencia", "Luis Antonio Valencia", "Luis Valencia"],
+                "misspellings": ["Valentia", "Valencea"]
+            },
+            {
+                "canonical": "Chris Smalling",
+                "aliases": ["Smalling", "Christopher Smalling"],
+                "misspellings": ["Smolin", "Smoling", "Smollin", "Chris Mullin", "Chris Mollen", "Smalin"]
+            },
+            {
+                "canonical": "Phil Jones",
+                "aliases": ["Jones", "Philip Jones"],
+                "misspellings": ["Jhones", "Jons", "Johnes"]
+            },
+            {
+                "canonical": "Marcos Rojo",
+                "aliases": ["Rojo", "Marco Rojo"],
+                "misspellings": ["Roho", "Rojho"]
+            },
+            {
+                "canonical": "Daley Blind",
+                "aliases": ["Blind", "Daly Blind"],
+                "misspellings": ["Blin", "Blinde", "Daley Blin", "Daly Blin", "Blint"]
+            },
+            {
+                "canonical": "Ander Herrera",
+                "aliases": ["Herrera", "Ander"],
+                "misspellings": ["Herera", "Hereraa", "Andér Herrera"]
+            },
+            {
+                "canonical": "Juan Mata",
+                "aliases": ["Mata", "Juan Manuel Mata"],
+                "misspellings": ["Matta", "Jua Mata"]
+            },
+            {
+                "canonical": "Marouane Fellaini",
+                "aliases": ["Fellaini", "Maroune Fellaini"],
+                "misspellings": ["Felaini", "Feleini", "Feleín", "Felaíni", "Feleín", "Felini", "Fellani"]
+            },
+            {
+                "canonical": "Ashley Young",
+                "aliases": ["Young", "A. Young"],
+                "misspellings": ["Hasley Young", "Asley Young", "Ashly Young", "Asli Young", "Ashely Young"]
+            },
+            {
+                "canonical": "Radamel Falcao",
+                "aliases": ["Falcao", "Falcao Garcia"],
+                "misspellings": ["Flacao", "Falcão"]
+            },
+            {
+                "canonical": "Robin van Persie",
+                "aliases": ["Van Persie", "Persie", "RVP"],
+                "misspellings": ["Van Persi", "van Percie", "Robin Van Persie", "Vanpersie"]
+            },
+            {
+                "canonical": "Angel Di Maria",
+                "aliases": ["Di Maria", "DiMaria"],
+                "misspellings": ["De Maria", "Dimaria", "Di María"]
+            },
+            {
+                "canonical": "Victor Valdes",
+                "aliases": ["Valdes", "Víctor Valdés"],
+                "misspellings": ["Valdez", "Valés", "Valdés", "Victor Valdez", "Víctor Valdez", "Valdéz"]
+            }
+        ],
+        "arsenal": [
+            {
+                "canonical": "David Ospina",
+                "aliases": ["Ospina"],
+                "misspellings": ["Ospyna", "Osspina"]
+            },
+            {
+                "canonical": "Hector Bellerin",
+                "aliases": ["Bellerin", "Bellerín"],
+                "misspellings": ["Belerin", "Belerín", "Hector Belerin"]
+            },
+            {
+                "canonical": "Per Mertesacker",
+                "aliases": ["Mertesacker", "Per"],
+                "misspellings": ["Mertezacker", "Mertes", "Mértez", "Mertesaker"]
+            },
+            {
+                "canonical": "Laurent Koscielny",
+                "aliases": ["Koscielny", "Kos"],
+                "misspellings": ["Koscielni", "Cosielny", "Colsielner", "Koscieleny"]
+            },
+            {
+                "canonical": "Nacho Monreal",
+                "aliases": ["Monreal", "Ignacio Monreal"],
+                "misspellings": ["Monrel", "Nimón Real", "Monréal"]
+            },
+            {
+                "canonical": "Francis Coquelin",
+                "aliases": ["Coquelin", "Coq"],
+                "misspellings": ["Cokelin", "Coquelín", "Cocquelin"]
+            },
+            {
+                "canonical": "Santi Cazorla",
+                "aliases": ["Cazorla", "Santiago Cazorla"],
+                "misspellings": ["Cazola", "Carzola", "Lancazor", "La Zorla"]
+            },
+            {
+                "canonical": "Aaron Ramsey",
+                "aliases": ["Ramsey", "A. Ramsey"],
+                "misspellings": ["Ramsay", "Ramsy", "Aron Ramsey"]
+            },
+            {
+                "canonical": "Mesut Ozil",
+                "aliases": ["Ozil", "Özil", "Mesut Özil"],
+                "misspellings": ["Oezil", "Ozíl", "Ozl", "Mesut", "Mesudo"]
+            },
+            {
+                "canonical": "Alexis Sanchez",
+                "aliases": ["Alexis", "Sanchez", "Alexis Sánchez"],
+                "misspellings": ["Sanches", "Sanchéz", "Sánchez", "Alexs Sanchez"]
+            },
+            {
+                "canonical": "Olivier Giroud",
+                "aliases": ["Giroud", "Ollie Giroud"],
+                "misspellings": ["Girud", "Giroudi", "Girot", "Giru", "Girout"]
+            },
+            {
+                "canonical": "Theo Walcott",
+                "aliases": ["Walcott", "T. Walcott"],
+                "misspellings": ["Walcot", "Wolcott", "Wallcott"]
+            },
+            {
+                "canonical": "Jack Wilshere",
+                "aliases": ["Wilshere", "J. Wilshere"],
+                "misspellings": ["Wilser", "Wilsher", "Wilshire", "Wiltshire", "Wilsere"]
+            },
+            {
+                "canonical": "Tomas Rosicky",
+                "aliases": ["Rosicky", "Tomáš Rosický"],
+                "misspellings": ["Rosicki", "Rosickí", "Tomás Rosicky"]
+            },
+            {
+                "canonical": "Gabriel Paulista",
+                "aliases": ["Gabriel", "Paulista"],
+                "misspellings": ["Gabriél Paulista", "Paulistá"]
+            }
+        ]
+    },
+    "teams": [
+        {
+            "canonical": "Manchester United",
+            "aliases": ["Man United", "MUFC"],
+            "misspellings": ["Mancheter United", "Manchester Utd", "Man Utd"]
+        },
+        {
+            "canonical": "Arsenal",
+            "aliases": ["AFC", "Arsenal FC"],
+            "misspellings": ["Arsenel", "Arsnal"]
+        }
+    ],
+    "venues": [
+        {
+            "canonical": "Old Trafford",
+            "aliases": ["Trafford", "Theatre of Dreams"],
+            "misspellings": ["Old Traford", "Olt Trafford"]
+        },
+        {
+            "canonical": "Emirates Stadium",
+            "aliases": ["Emirates", "The Emirates"],
+            "misspellings": ["Emirate Stadium", "Emirats"]
+        },
+        {
+            "canonical": "Wembley Stadium",
+            "aliases": ["Wembley"],
+            "misspellings": ["Wembely", "Wembly"]
+        }
+    ],
+    "competitions": [
+        {
+            "canonical": "Premier League",
+            "aliases": ["EPL", "English Premier League", "The Premier League"],
+            "misspellings": ["Primier League", "Premier Leage"]
+        },
+        {
+            "canonical": "FA Cup",
+            "aliases": ["The FA Cup", "Football Association Cup"],
+            "misspellings": ["FA cup", "Fa Cup"]
+        },
+        {
+            "canonical": "Champions League",
+            "aliases": ["UCL", "UEFA Champions League"],
+            "misspellings": ["Chamions League", "Champion League"]
+        }
+    ]
+}

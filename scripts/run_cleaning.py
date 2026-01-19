@@ -5,14 +5,21 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from pathlib import Path
 from src.data_loader import load_transcript, save_transcript
-from src.cleaning.normalizer import NameNormalizer
+from src.cleaning.normalizer import NameNormalizer, ImprovedNameNormalizer
 from src.cleaning.ner_extractor import NERExtractor
 
 def main():
     # 1. Configuration
     input_file = Path("data/raw/2_asr.json")
     output_file = Path("data/processed/2_asr_cleaned.json")
-    entities_file = Path("data/external/players_2015.json")
+    
+    # Use the new structured gazetteer (with misspellings and aliases)
+    entities_file = Path("data/external/entities_2015.json")
+    
+    # Fallback to old simple list if new one doesn't exist
+    if not entities_file.exists():
+        entities_file = Path("data/external/players_2015.json")
+        print("Warning: Using legacy players file. Consider using entities_2015.json")
 
     # 2. Check files exist
     if not input_file.exists():
@@ -24,22 +31,22 @@ def main():
 
     # 3. Initialize tools
     print("Initializing cleaning pipeline...")
-    normalizer = NameNormalizer(entities_file)
+    normalizer = NameNormalizer(str(entities_file))
     
     # 4. Load data
     print(f"Loading transcript from {input_file}...")
     segments = load_transcript(input_file)
     
-    # 5. Run cleaning with NER-first approach
-    print("\nRunning NER-based name normalization...")
+    # 5. Run cleaning
+    print("\nRunning name normalization...")
     print("="*60)
     cleaned_count = 0
     
     for i, segment in enumerate(segments):
         original_text = segment["text"]
         
-        # Use the new NER-first approach
-        cleaned_text = normalizer.normalize_sentence(original_text, threshold=85, debug=False)
+        # Use the improved normalizer
+        cleaned_text = normalizer.normalize_sentence(original_text, debug=False)
         
         if original_text != cleaned_text:
             cleaned_count += 1
@@ -60,16 +67,21 @@ def main():
 
 def test_normalizer():
     """Test the normalizer with example sentences to verify it works correctly."""
-    entities_file = Path("data/external/players_2015.json")
+    # Use the new structured gazetteer
+    entities_file = Path("data/external/entities_2015.json")
     
     if not entities_file.exists():
-        print(f"ERROR: Database file not found: {entities_file}")
+        # Fallback to old file
+        entities_file = Path("data/external/players_2015.json")
+    
+    if not entities_file.exists():
+        print(f"ERROR: Database file not found")
         return
     
-    print("Testing NER-based normalizer...")
+    print("Testing Improved Normalizer...")
     print("="*60)
     
-    normalizer = NameNormalizer(entities_file)
+    normalizer = NameNormalizer(str(entities_file))
     
     # Test cases - including problematic ones
     test_sentences = [
@@ -86,9 +98,13 @@ def test_normalizer():
         ("Felaini scores a header!", True),  # Felaini -> Fellaini
         ("Chris Mullin clears the ball.", True),  # Mullin -> Smalling
         
-        # Edge cases
+        # Edge cases with punctuation
         ("Hasley Young runs down the wing.", True),  # Hasley -> Ashley
         ("Daley Blin makes a tackle.", True),  # Blin -> Blind
+        ("Valdez, with a great save!", True),  # Punctuation handling
+        ("It was Ozil's pass.", False),  # Possessive
+        ("(Giroud) scores again.", False),  # Parentheses - already correct
+        ("Girud scores!", True),  # Misspelling with punctuation
     ]
     
     print("\nTest Results:")
@@ -98,7 +114,7 @@ def test_normalizer():
     total = len(test_sentences)
     
     for sentence, should_change in test_sentences:
-        cleaned = normalizer.normalize_sentence(sentence, threshold=85, debug=True, expand_names=False)
+        cleaned = normalizer.normalize_sentence(sentence, debug=True)
         did_change = sentence != cleaned
         
         status = "✓" if did_change == should_change else "✗"
