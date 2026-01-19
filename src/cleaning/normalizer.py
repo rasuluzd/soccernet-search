@@ -409,6 +409,10 @@ class ImprovedNameNormalizer:
             if lookup_result:
                 canonical, match_type, confidence = lookup_result
                 
+                # If exact match, no replacement needed
+                if match_type == "exact":
+                    continue
+                
                 # Determine the replacement
                 replacement = self._smart_replacement(
                     result, candidate["start"], clean_text, canonical
