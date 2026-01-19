@@ -6,6 +6,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from pathlib import Path
 from src.data_loader import load_transcript, save_transcript
 from src.cleaning.normalizer import NameNormalizer, ImprovedNameNormalizer
+
+# Try to import comprehensive normalizer
+try:
+    from src.cleaning.comprehensive_normalizer import ComprehensiveNormalizer
+    HAS_COMPREHENSIVE = True
+except ImportError:
+    HAS_COMPREHENSIVE = False
+
 from src.cleaning.ner_extractor import NERExtractor
 
 def main():
@@ -166,21 +174,150 @@ def analyze_entities():
         print(f"      Entities: {[(e['text'], e['label']) for e in seg['entities']]}")
 
 
+def process_comprehensive():
+    """Process the transcript with the comprehensive normalizer."""
+    if not HAS_COMPREHENSIVE:
+        print("ERROR: Comprehensive normalizer not available. Install jellyfish: pip install jellyfish")
+        return
+    
+    input_file = Path("data/raw/2_asr.json")
+    output_file = Path("data/processed/2_asr_comprehensive.json")
+    entities_file = Path("data/external/entities_2015.json")
+    
+    if not input_file.exists():
+        print(f"ERROR: Input file not found: {input_file}")
+        return
+    if not entities_file.exists():
+        print(f"ERROR: Database file not found: {entities_file}")
+        return
+    
+    print("Processing transcript with Comprehensive Normalizer...")
+    print("=" * 60)
+    
+    normalizer = ComprehensiveNormalizer(str(entities_file))
+    
+    # Load data
+    print(f"\nLoading transcript from {input_file}...")
+    segments = load_transcript(input_file)
+    
+    # Process
+    print("\nRunning comprehensive normalization...")
+    print("-" * 60)
+    cleaned_count = 0
+    all_corrections = []
+    
+    for i, segment in enumerate(segments):
+        original_text = segment["text"]
+        cleaned_text = normalizer.normalize_sentence(original_text, debug=False)
+        
+        if original_text != cleaned_text:
+            cleaned_count += 1
+            all_corrections.append({
+                'segment': i,
+                'original': original_text,
+                'cleaned': cleaned_text
+            })
+            print(f"\n[Segment {i}]")
+            print(f"  Original: '{original_text}'")
+            print(f"  Cleaned:  '{cleaned_text}'")
+        
+        segment["text"] = cleaned_text
+    
+    # Save result
+    print("\n" + "=" * 60)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    save_transcript(segments, output_file)
+    print(f"\nDone! {cleaned_count} segments were modified.")
+    print(f"Result saved to: {output_file}")
+    
+    return all_corrections
+
+
+def test_comprehensive():
+    """Test the comprehensive normalizer."""
+    if not HAS_COMPREHENSIVE:
+        print("ERROR: Comprehensive normalizer not available")
+        return
+    
+    entities_file = Path("data/external/entities_2015.json")
+    if not entities_file.exists():
+        print(f"ERROR: Database file not found")
+        return
+    
+    print("Testing Comprehensive Normalizer...")
+    print("=" * 60)
+    
+    normalizer = ComprehensiveNormalizer(str(entities_file))
+    
+    test_cases = [
+        # Original test cases
+        ("There is a lot of excitement in the stadium.", False),
+        ("They will play well today.", False),
+        ("The stuff that happens in football is unpredictable.", False),
+        ("Which team will win this match?", False),
+        ("Valdez makes a great save.", True),
+        ("Wilser is back from injury.", True),
+        ("Great save by De Gea at Old Trafford!", False),
+        ("Felaini scores a header!", True),
+        ("Chris Mullin clears the ball.", True),
+        ("Hasley Young runs down the wing.", True),
+        ("Daley Blin makes a tackle.", True),
+        ("Valdez, with a great save!", True),
+        ("It was Ozil's pass.", False),
+        ("(Giroud) scores again.", False),
+        ("Girud scores!", True),
+        # Additional comprehensive tests
+        ("Smolin with a clearance", True),
+        ("Wiltshire controls midfield", True),
+        ("Mertez clears the ball", True),
+        ("Dejaa saves from close range", True),
+        ("Coqueland at right back", True),
+    ]
+    
+    print("\nTest Results:")
+    print("-" * 60)
+    passed = 0
+    total = len(test_cases)
+    
+    for sentence, should_change in test_cases:
+        result = normalizer.normalize_sentence(sentence, debug=True)
+        changed = result != sentence
+        
+        if changed == should_change:
+            status = "✓"
+            passed += 1
+        else:
+            status = "✗"
+        
+        expected = "SHOULD CHANGE" if should_change else "NO CHANGE EXPECTED"
+        actual = "CHANGED" if changed else "NO CHANGE"
+        
+        print(f"\n{status} [{expected} -> {actual}]")
+        print(f"  Input:  {sentence}")
+        print(f"  Output: {result}")
+    
+    print("\n" + "=" * 60)
+    print(f"Results: {passed}/{total} tests passed")
+
+
 if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Clean ASR transcripts")
     parser.add_argument("--test", action="store_true", help="Run normalizer tests")
+    parser.add_argument("--comprehensive", action="store_true", help="Test comprehensive normalizer")
+    parser.add_argument("--process", action="store_true", help="Process transcript with comprehensive normalizer")
     parser.add_argument("--analyze", action="store_true", help="Analyze entities in transcript")
     
     args = parser.parse_args()
     
     if args.test:
         test_normalizer()
+    elif args.comprehensive:
+        test_comprehensive()
+    elif args.process:
+        process_comprehensive()
     elif args.analyze:
         analyze_entities()
     else:
         main()
-
-if __name__ == "__main__":
-    main()

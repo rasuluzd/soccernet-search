@@ -68,8 +68,9 @@ class ImprovedNameNormalizer:
     
     def _build_lookups(self):
         """Build fast lookup dictionaries from the gazetteer."""
-        # Maps misspelling -> canonical name
-        self.misspelling_map: Dict[str, str] = {}
+        # Maps misspelling -> (canonical_name, corrected_form)
+        # corrected_form preserves the structure of the misspelling
+        self.misspelling_map: Dict[str, Tuple[str, str]] = {}
         
         # Maps alias -> canonical name
         self.alias_map: Dict[str, str] = {}
@@ -82,6 +83,42 @@ class ImprovedNameNormalizer:
         
         # All searchable terms for fuzzy matching
         self.all_terms: List[str] = []
+        
+        def find_best_correction(misspelling: str, canonical: str) -> str:
+            """Find the best correction that matches the misspelling structure."""
+            misspelling_parts = misspelling.split()
+            canonical_parts = canonical.split()
+            
+            # If same number of words, correct each part
+            if len(misspelling_parts) == len(canonical_parts):
+                return canonical
+            
+            # If misspelling is single word, find best matching part from canonical
+            if len(misspelling_parts) == 1:
+                misspelling_lower = misspelling.lower()
+                best_match = None
+                best_score = 0
+                
+                for part in canonical_parts:
+                    part_lower = part.lower()
+                    # Skip very short parts (like "De", "Van") unless they're the only option
+                    if len(part) < 3 and len(canonical_parts) > 1:
+                        continue
+                    score = fuzz.ratio(misspelling_lower, part_lower)
+                    # Prefer longer parts with similar scores
+                    if score > best_score or (score == best_score and best_match and len(part) > len(best_match)):
+                        best_score = score
+                        best_match = part
+                
+                # If no match found (all parts were too short), use the last name
+                if not best_match:
+                    # Find the longest part as a fallback
+                    best_match = max(canonical_parts, key=len)
+                
+                return best_match
+            
+            # Otherwise return full canonical
+            return canonical
         
         def process_entity(entity: Dict):
             """Process a single entity entry."""
@@ -110,9 +147,10 @@ class ImprovedNameNormalizer:
                         if canonical not in self.name_parts_map[part_lower]:
                             self.name_parts_map[part_lower].append(canonical)
             
-            # Add misspellings
+            # Add misspellings with structure-preserving corrections
             for misspelling in entity.get("misspellings", []):
-                self.misspelling_map[misspelling.lower()] = canonical
+                corrected = find_best_correction(misspelling, canonical)
+                self.misspelling_map[misspelling.lower()] = (canonical, corrected)
         
         # Process players
         if "players" in self.gazetteer:
@@ -220,7 +258,8 @@ class ImprovedNameNormalizer:
         
         # 2. Direct misspelling lookup (highest priority for corrections!)
         if text_lower in self.misspelling_map:
-            return (self.misspelling_map[text_lower], "misspelling", 0.98)
+            canonical, corrected = self.misspelling_map[text_lower]
+            return (corrected, "misspelling", 0.98)
         
         # 3. Alias lookup
         if text_lower in self.alias_map:
@@ -243,17 +282,33 @@ class ImprovedNameNormalizer:
         # 5. Fuzzy matching against misspellings (for unknown variations)
         best_misspelling_match = None
         best_misspelling_score = 0
+        best_misspelling_corrected = None
         
-        for misspelling, canonical in self.misspelling_map.items():
+        for misspelling, (canonical, corrected) in self.misspelling_map.items():
             # Only compare if lengths are similar (avoid comparing "a" to "alexander")
             if abs(len(text_lower) - len(misspelling)) <= 3:
                 score = fuzz.ratio(text_lower, misspelling)
                 if score > best_misspelling_score and score >= 80:
                     best_misspelling_score = score
                     best_misspelling_match = canonical
+                    best_misspelling_corrected = corrected
         
-        if best_misspelling_match:
-            return (best_misspelling_match, "fuzzy_misspelling", best_misspelling_score / 100)
+        if best_misspelling_corrected:
+            # For fuzzy matches, determine the best correction based on input structure
+            input_parts = text.split()
+            if len(input_parts) == 1:
+                # Single word input - find best matching part from canonical
+                canonical_parts = best_misspelling_match.split()
+                best_part = None
+                best_score = 0
+                for part in canonical_parts:
+                    score = fuzz.ratio(text_lower, part.lower())
+                    if score > best_score:
+                        best_score = score
+                        best_part = part
+                return (best_part if best_part else best_misspelling_corrected, "fuzzy_misspelling", best_misspelling_score / 100)
+            else:
+                return (best_misspelling_corrected, "fuzzy_misspelling", best_misspelling_score / 100)
         
         # 6. Fuzzy matching against name parts
         best_part_match = None
@@ -407,18 +462,21 @@ class ImprovedNameNormalizer:
             lookup_result = self._lookup_entity(clean_text)
             
             if lookup_result:
-                canonical, match_type, confidence = lookup_result
+                corrected, match_type, confidence = lookup_result
                 
                 # If exact match, no replacement needed
                 if match_type == "exact":
                     continue
                 
-                # Determine the replacement
-                replacement = self._smart_replacement(
-                    result, candidate["start"], clean_text, canonical
-                )
+                # Only replace for actual misspellings, not aliases
+                # This prevents shortening "Ander Herrera" to "Herrera"
+                if match_type not in ("misspelling", "fuzzy_misspelling"):
+                    continue
                 
-                if replacement and replacement != clean_text:
+                # Use the corrected form directly (already structure-preserving)
+                replacement = corrected
+                
+                if replacement and replacement.lower() != clean_text.lower():
                     # Restore punctuation
                     full_replacement = leading_punct + replacement + trailing_punct
                     
